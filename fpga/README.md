@@ -32,35 +32,6 @@ the DfDD project.
 
 ------------------------------------------------------------------------
 
-# Depth from Differential Defocus (DfDD) Project
-
-I am currently part of the BiV lab headed by Professor Emma Alexander at
-Northwestern University (see https://www.alexander.vision/).
-
-DfDD in general is a technique where if you capture two images of the
-same scene but with slightly different focus levels, you can use those
-defocus cues to extract depth information (to produce a sparse depth
-map). As can be seen in the diagram, we have two image sensors receiving
-the same image from the beam splitter, but at slightly different focus
-levels, which are then fed to the development board via ribbon cables.
-
-In order to align the images, we use an affine transformation matrix
-with bilinear interpolation. Then through a series of convolutions and
-finally a division, it produces a depth map which is then communicated
-via an FT232H chip to the host computer to be displayed.
-
-This is all pipelined and accomplished via stream processing which
-allows us to buffer way fewer lines, meaning we don't need dedicated
-SDRAM which would consume a lot of power and can instead rely on the
-FPGA's embedded memory.
-
-I developed the RTL code to perform all these tasks on the FPGA (ECP5).
-We submitted a paper to CVPR which I am co-first authored with Tianao Li
-and John Mamish. For details about the CVPR submission and live demo
-video, please contact me.
-
-------------------------------------------------------------------------
-
 # Folder Structure
 
 ### rtl

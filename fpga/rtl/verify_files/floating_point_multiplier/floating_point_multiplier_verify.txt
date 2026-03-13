@@ -1,0 +1,116 @@
+Multiply Two Floating Point Numbers
+
+Specification:
+- given two fp numbers, fp_a_i and fp_b_i, multiply them together and
+produce fp_o
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    _*_
+- FRAC_WIDTH, width of fractional part                                  _*_
+
+'Local' Parameters:
+- SIGN_IDX, the index of the sign bit                                   _*_
+    -> FRAC_WIDTH + EXP_WIDTH                                           
+- EXP_IDX_LSB, the lsb index of the exp bits                            _*_
+    -> FRAC_WIDTH                                                         
+- EXP_IDX_MSB, the msb index of the exp bits                            _*_
+    -> EXP_IDX_LSB + EXP_WIDTH - 1                                      
+- FRAC_IDX_LSB, the lsb index of the sign bit                           _*_
+    -> 0                                                                
+- FRAC_IDX_MSB, the msb index of the frac bits                          _*_
+    -> FRAC_WIDTH + FRAC_IDX_LSB - 1                                    
+- FP_WIDTH_REG, width of fp in regular form                             _*_
+    -> 1 + EXP_WIDTH + FRAC_WIDTH                                       
+- FP_WIDTH_TOT, width of fp in total form                               _*_
+    -> 1 + EXP_WIDTH + 1 + 1 + FRAC_WIDTH + 1
+- FRAC_EX_WIDTH, width of frac ex                                       _*_
+    -> 1 + 1 + FRAC_WIDTH + 1
+- FRAC_EX_MULT_WIDTH, width of fp in total form                         _*_
+  *2 (for when its multiplied)
+    -> 2  * FRAC_EX_WIDTH
+- BIAS, exponent bias                                                   _*_
+    -> 2**(EXP_WIDTH - 1) - 1
+- EXP_MAX, max exponent unsigned                                        _*_
+    -> 2**EXP_WIDTH - 1                                                                             
+                                    
+
+IO:
+- check widths                                                          _*_                                                    
+
+Input Registers:
+- check widths                                                          _*_
+-- stage 1 --                                                   
+- fp_*_reg samples fp_*_i                    @ clk_i                    _*_                                  
+- if rst_i is high, valid_reg samples 0      @ clk_i                    _*_
+- if rst_i is low, valid_reg samples valid_i @ clk_i                    _*_
+-- stage 2 --
+- fp_sign_reg     samples fp_sign                @ clk_i                _*_         
+- fp_exp_reg      samples fp_exp                 @ clk_i                _*_
+- fp_frac_ex_reg  samples fp_frac_ex             @ clk_i                _*_
+- if rst_i is high, valid_reg_1  samples 0         @ clk_i              _*_
+- if rst_i is low, valid_reg_1   samples valid_reg @ clk_i              _*_                      
+
+
+Stage 1:
+--- main multiply ---
+- check widths                                                                  _*_                        
+- sign, exp and frac starting values                                            _*_
+- check unsigned type for fp_*_frac_ex (since it will be multiplied)            _*_
+- fp_mult too is unsigned                                                       _*_
+- for subnormal, if exp is 0, set lead bit to 0 and frac to 0                   _*_
+    - by doing so, this guarantees that all multiplied numbers produce          _*_
+      either a 1 bit in the carry or lead position (or both), or just 0
+then
+- set fp_*_frac_ex to the appropriate concatenation of values                   _*_
+then
+- multiply fp_a_frac_ex and fp_b_frac_ex and store in fp_mult                   _*_
+- set fp_frac to the top FRAC_EX_WIDTH bits                                     _*_
+- the sign bit is just xor                                                      _*_
+--- exponent ---
+- first we need to translate the exponents into their signed equivalents        _*_
+- the signed exponent is 2 bits wider than the exponent                         _*_
+- set it to the {2'b00, exp}                                                    _*_
+- subtract the bias from each exp, which is 2^(EXP_WIDTH - 1) - 1               _*_
+    - because it is 2 bit wider,  it can accomodate this operation              _*_
+- add them together                                                             _*_                         
+- using the effective range of the exponents (see general_desc.txt), the values _*_
+  for overflow and underflow are:
+  - underflow / subnormal 0 approximation: <= -BIAS,                            _*_
+    - set exp as -(2**(EXP_WIDTH-1) - 1)= -BIAS                                 _*_
+    - set fp mult as 0                                                          _*_
+  - overflow / Infinity/NaN: >= BIAS + 1,                                       _*_
+    - set exp as 2^(EXP_WIDTH - 1) = BIAS + 1                                   _*_
+    - set fp mult as 0
+- but what if the carry bit is 1? See the general_desc doc (this is another modification) _*_
+- if either exp is originally INF, maintain INF                                 _*_                                     
+- the largest underflow is 2 * -(2^(EXP_WIDTH - 1) - 2) = -2^EXP_WIDTH + 4      _*_
+- the largest overflow is  2 * 2^(EXP_WIDTH - 1) = 2^EXP_WIDTH                  _*_
+- both of these values fit in the signed exponent which is 2 bits wider         _*_
+then
+- add the bias and select the exp bits to output                                _*_
+
+Stage 2
+-- main rounding and balancing --
+- if carry bit, right shift by 1                                                _*_
+- if exp is at max exp, maintain else add 1 to exp                              _*_
+then
+- if round bit
+    - add 1 to frac_ex                                                          _*_
+then
+- if carry bit again, right shift by 1                                          _*_
+- if exp is at max exp, maintain else add 1 to exp                              _*_
+- we don't need to check round bit again                                        _*_
+
+Output:
+- select frac bits and output                                                   _*_
+- valid_o is valid_reg_1                                                        _*_
+
+Log:
+- floating point multiplier has been verified by me (7/30/25) 
+    

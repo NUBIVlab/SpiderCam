@@ -1,0 +1,73 @@
+Round Result
+
+Specification:
+- given fp_i, round the result and output in regular form
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    
+- FRAC_WIDTH, width of fractional part                                  
+
+'Local' Parameters:
+- FRAC_EX_WIDTH, width of frac ex                       
+    -> 1 + 1 + FRAC_WIDTH + 1                                       _*_ _*_                                                                                                             
+- FRAC_EX_IDX_LSB, lsb index of frac ex 
+    -> 0                                                            _*_ _*_                                                                                              
+- FRAC_EX_IDX_MSB, msb index of frac ex
+    -> FRAC_EX_WIDTH + FRAC_EX_IDX_LSB - 1                          _*_ _*_
+- FRAC_IDX_LSB, lsb index of frac
+    -> 1                                                            _*_ _*_
+- FRAC_IDX_MSB, msb index of frac
+    -> FRAC_WIDTH + FRAC_IDX_LSB - 1                                _*_ _*_                                                                      
+- EXP_IDX_LSB, lsb index of exp ex
+    -> FRAC_EX_WIDTH                                                _*_ _*_                                                                                                 
+- EXP_IDX_MSB, msb index of exp ex
+    -> EXP_WIDTH + EXP_IDX_LSB - 1                                  _*_ _*_                                                       
+- SIGN_IDX, index of sign bit
+    -> EXP_WIDTH + FRAC_EX_WIDTH                                    _*_ _*_
+- CARRY_IDX, index of carry bit
+    -> 1 + FRAC_WIDTH + 1                                           _*_ _*_                            
+- FP_WIDTH_TOT, width of total form fp
+    -> 1 + EXP_WIDTH + FRAC_EX_WIDTH                                _*_ _*_
+- FP_WIDTH_REG, width of regular form fp 
+    -> 1 + EXP_WIDTH + FRAC_WIDTH                                   _*_ _*_
+- ROUND_IDX, idx of round bit                                       
+    -> 0                                                            _*_ _*_
+- EXP_MAX, max value of an exponent (INF)
+    -> (2**EXP_WIDTH) - 1                                           _*_ _*_
+
+IO:
+- check widths                                                          
+
+Input Registers:
+- check widths                                                      _*_ _*_                                                      
+- fp_reg samples fp_i @ clk_i                                       _*_ _*_     
+- if rst_i is high, valid_reg samples 0       @ clk_i               _*_ _*_         
+- if rst_i is low,  valid_reg samples valid_i @ clk_i               _*_ _*_
+
+Main:
+- check widths                                                      _*_ _*_    
+- sign, exp and frac_ex starting values                             _*_ _*_
+- exp_const is exp starting value                                   _*_ _*_
+- the logic is as such:
+    - if round bit is 1, add 1 to frac_ex                           _*_ _*_
+then
+    - if carry bit, add 1 to exp and right                          _*_ _*_
+      shift frac_ex                                                 
+then
+    - if exp_const is EXP_MAX, set exp to EXP_MAX                   _*_ _*_
+
+Output
+- fp_o in regular form is the concatenation of fp_sign, fp_exp,     _*_ _*_
+  and fp_ex_frac[FRAC_IDX_MSB : FRAC_IDX_LSB]
+- valid_o is valid_reg                                              _*_ _*_
+
+Log:
+- rr has been verified by me (7/10/25)
+- rr has been verified by me (7/14/25)
+

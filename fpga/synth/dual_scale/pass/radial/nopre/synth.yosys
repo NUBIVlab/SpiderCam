@@ -1,0 +1,93 @@
+verific -vlog-define NO_INCLUDES
+verific -sv -lib +/ecp5/cells_sim.v +/ecp5/cells_bb.v  +/ecp5/cells_ff.vh  +/ecp5/cells_io.vh
+verific -vlog-undef NO_INCLUDES
+
+verific -sv ../../../../../rtl/third_party/i2c_initializer.sv \
+            ../../../../../rtl/third_party/ft232h_driver.sv \
+            ../../../../../rtl/third_party/camera_reader.sv \
+            ../../../../../rtl/third_party/RAM_2Port.v \
+            ../../../../../rtl/third_party/async_fifo.v \
+            ../../../../../rtl/third_party/word_concatenator.sv \
+            ../../../../../rtl/third_party/dual_camera_wrapper.sv \
+            ../../../../../rtl/third_party/util.v \
+            \
+            ../../../../../rtl/bilinear_xform.sv \
+            ../../../../../rtl/roi.sv            \
+            ../../../../../rtl/controller.sv \
+            ../../../../../rtl/window_fetcher.sv \
+            ../../../../../rtl/window_fetcher_z.sv \
+            ../../../../../rtl/convolution_floating_point.sv \
+            ../../../../../rtl/convolution_floating_point_z.sv \
+            ../../../../../rtl/floating_point_adder.sv         \
+            ../../../../../rtl/floating_point_adder_z.sv       \
+            ../../../../../rtl/floating_point_divider.sv       \
+            ../../../../../rtl/floating_point_divider_z.sv     \
+            ../../../../../rtl/floating_point_multiplier.sv    \
+            ../../../../../rtl/floating_point_multiplier_z.sv  \
+            ../../../../../rtl/floating_point_multiplier_exponent.sv \
+            ../../../../../rtl/fp16_u8_converter.sv \
+            ../../../../../rtl/uint8_fp16_converter.sv \
+            ../../../../../rtl/uint8_12_to_fp16_converter.sv \
+            ../../../../../rtl/sint10_12_to_fp16_converter.sv \
+            \
+            ../../../../../projects/dfdd/zero_scale_fp16.sv \
+            ../../../../../projects/dfdd/zero_inserter.sv   \
+            ../../../../../projects/dfdd/downsampler_0_fp16.sv \
+            ../../../../../projects/dfdd/upsampler_0_fp16.sv \
+            ../../../../../projects/dfdd/burt_h_0_fp16.sv    \
+            ../../../../../projects/dfdd/burt_v_0_fp16.sv    \
+            ../../../../../projects/dfdd/burt_h_1_fp16.sv    \
+            ../../../../../projects/dfdd/burt_v_1_fp16.sv    \
+            ../../../../../projects/dfdd/dx_0_fp16.sv        \
+            ../../../../../projects/dfdd/dy_0_fp16.sv        \
+            ../../../../../projects/dfdd/pass_0_fp16.sv      \
+            ../../../../../projects/dfdd/dx_1_fp16.sv        \
+            ../../../../../projects/dfdd/dy_1_fp16.sv        \
+            ../../../../../projects/dfdd/pass_1_fp16.sv      \
+            ../../../../../projects/dfdd/pass_dx_dy_adder_fp16.sv \
+            ../../../../../projects/dfdd/preprocessor_fp16.sv \
+            ../../../../../projects/dfdd/v_w_divider_0.sv     \
+            ../../../../../projects/dfdd/box_h_0_fp16.sv      \
+            ../../../../../projects/dfdd/box_v_0_fp16.sv      \
+            ../../../../../projects/dfdd/downsampler_h_0_fp16.sv \
+            ../../../../../projects/dfdd/downsampler_v_0_fp16.sv \
+            ../../../../../projects/dfdd/downsampler_h_1_fp16.sv \
+            ../../../../../projects/dfdd/downsampler_v_1_fp16.sv \
+            ../../../../../projects/dfdd/upsampler_h_0_fp16.sv   \
+            ../../../../../projects/dfdd/upsampler_v_0_fp16.sv   \
+            ../../../../../projects/dfdd/upsampler_v_1_fp16.sv   \
+            ../../../../../projects/dfdd/upsampler_h_1_fp16.sv   \
+            ../../../../../projects/dfdd/first_scale_fp16.sv     \
+            ../../../../../projects/dfdd/v_w_adder_1_fp16.sv      \
+            ../../../../../projects/dfdd/dual_scale_adder_fp16.sv \
+            ../../../../../projects/dfdd/dual_scale_wrapper_fp16.sv \
+            ../../../../../projects/dfdd/upsampler_sh_h_0_fp16.sv \
+            ../../../../../projects/dfdd/upsampler_sh_v_0_fp16.sv \
+            ../../../../../projects/dfdd/upsampler_sh_v_1_fp16.sv \
+            ../../../../../projects/dfdd/upsampler_sh_h_1_fp16.sv \
+            ../../../../../projects/dfdd/custom_box_h_3_uint8_to_uint10.sv \
+            ../../../../../projects/dfdd/custom_box_v_3_uint10_to_uint12.sv \
+            ../../../../../projects/dfdd/custom_burt_h_uint12_to_uint16.sv \
+            ../../../../../projects/dfdd/custom_burt_v_uint16_to_uint20.sv \
+            ../../../../../projects/dfdd/preprocessor_hybrid_uint8_to_fp16.sv \
+            ../../../../../projects/dfdd/custom_burt_h_sint14_to_sint18.sv \
+            ../../../../../projects/dfdd/custom_burt_v_sint18_to_sint22.sv \
+            ../../../../../projects/dfdd/box_h_0_ones_fp16.sv \
+            ../../../../../projects/dfdd/box_v_0_ones_fp16.sv \
+            ../../../../../projects/dfdd/box_h_0_ones_7x7_fp16.sv \
+            ../../../../../projects/dfdd/box_v_0_ones_7x7_fp16.sv \
+            ../../../../../projects/dfdd/box_h_0_ones_9x9_fp16.sv \
+            ../../../../../projects/dfdd/box_v_0_ones_9x9_fp16.sv \
+            ../../../../../projects/dfdd/box_h_0_ones_11_fp16.sv \
+            ../../../../../projects/dfdd/box_v_0_ones_11_fp16.sv \
+            ../../../../../projects/dfdd/radial_a_b_fp16.sv \
+            ../../../../../projects/dfdd/radial_c_z_fp16.sv \
+            \
+            ../../../../../rtl/zero_latency_buffer.sv \
+            ../../../../../rtl/stream_buffer.sv \
+            ../../../../../rtl/stream_deserializer.sv \
+            \
+            pll.sv \
+            top.sv
+
+synth_ecp5 -top top -json top.json 

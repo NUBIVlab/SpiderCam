@@ -1,0 +1,70 @@
+Floating Point Adder
+
+Specification:
+- Wire up all the pieces in the following order:
+1. sgm - select greater magnitude
+2. ngm - normalize greater magnitude
+x x x 3. rnv - round normalized value x x x
+3. cvt - convert to signed 
+4. avt - add values together
+5. cvu - convert to unsigned 
+6. nr  - normalize result
+7. rr  - round result 
+
+Modification:
+- previously I thought the rounding at rnv was necessary
+but actually it is premature. Instead it is better to allow
+the addition to happen first and let the final rounding do
+the job. Therefore, 'rnv' has been removed adnt this is now
+a 7 stage pipelined adder.
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    
+- FRAC_WIDTH, width of fractional part
+
+'Local' Parameters:                                                                
+- FP_WIDTH_TOT, width of total form fp
+    -> 1 + EXP_WIDTH + FRAC_EX_WIDTH                            _*_                           
+- FP_WIDTH_REG, width of regular form fp 
+    -> 1 + EXP_WIDTH + 1 + 1 + FRAC_WIDTH + 1                   _*_
+
+IO:
+- check widths                                                  _*_
+
+Wiring:
+- naming convention is from_to_*_w                              _*_
+- check 1 wires - sgm
+    - parameters                                                _*_
+    - widths                                                    _*_
+    - names                                                     _*_
+- check 2 wires - ngm
+    - parameters                                                _*_
+    - widths                                                    _*_
+    - names                                                     _*_
+- check 3 wires - cvt
+    - parameters                                                _*_
+    - widths                                                    _*_
+    - names                                                     _*_
+- check 4 wires - avt
+    - parameters                                                _*_                         
+    - widths                                                    _*_
+    - names                                                     _*_
+- check 5 wires - cvu
+    - parameters                                                _*_                                                   
+    - widths                                                    _*_
+    - names                                                     _*_ 
+- check 6 wires - nr
+    - parameters                                                _*_
+    - widths                                                    _*_
+    - names                                                     _*_
+- check 7 wires - rr
+    - parameters                                                _*_
+    - widths                                                    _*_
+    - names                                                     _*_
+- check clk_i and rst_i for all                                 _*_
+
+Output:
+- check output of rr to top out                                 _*_
+
+Log:
+- floating point adder has been verfied once by me (7/10/25)                                

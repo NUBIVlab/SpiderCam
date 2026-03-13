@@ -1,0 +1,81 @@
+Select Greater Magnitude
+
+Specification:
+- Given two floating point numbers fp_a_i and fp_b_i, output fp_a_o and fp_b_o such
+that fp_a_o would be the fp with the greater exponent.
+- Also find the difference in exponents and pass it down
+- Pass the valid signal, reset valid signal to 0 on reset.
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    _*_
+- FRAC_WIDTH, width of fractional part                                  _*_
+
+'Local' Parameters:
+- SIGN_IDX, the index of the sign bit 
+    -> FRAC_WIDTH + EXP_WIDTH                                           _*_ _*_
+- EXP_IDX_LSB, the lsb index of the exp bits 
+    -> FRAC_WIDTH                                                       _*_ _*_  
+- EXP_IDX_MSB, the msb index of the exp bits 
+    -> EXP_IDX_LSB + EXP_WIDTH - 1                                      _*_ _*_
+- FRAC_IDX_LSB, the lsb index of the sign bit 
+    -> 0                                                                _*_ _*_
+- FRAC_IDX_MSB, the msb index of the frac bits
+    -> FRAC_WIDTH + FRAC_IDX_LSB - 1                                    _*_ _*_
+- FP_WIDTH_REG, width of fp in regular form 
+    -> 1 + EXP_WIDTH + FRAC_WIDTH                                       _*_ _*_
+- FP_WIDTH_TOT, width of fp in total form
+    -> 1 + EXP_WIDTH + 1 + 1 + FRAC_WIDTH + 1                           _*_ _*_
+
+IO:
+- check widths are set with correct parameters                          _*_ _*_
+
+
+Input Registers:
+- check widths                                                          _*_ _*_
+- fp_a_reg samples fp_a_i @ clk_i                                       _*_ _*_
+- fp_b_reg samples fp_b_i @ clk_i                                       _*_ _*_
+- if rst_i is high, valid_reg samples 0       @ clk_i                   _*_ _*_
+- if rst_i is low,  valid_reg samples valid_i @ clk_i                   _*_ _*_
+
+Main:
+- check widths                                                          _*_ _*_
+- values are set for sign, exp, carry, lead, frac, round for fp_a_* and fp_b_*
+    -> carry is 0                                                       _*_ _*_                                          
+    -> lead  is 1                                                       _*_ _*_
+    -> round is 0                                                       _*_ _*_
+- *_sign is SIGN_IDX                                                    _*_ _*_
+- *_exp is [EXP_IDX_MSB : EXP_IDX_LSB]                                  _*_ _*_
+- *_frac is [FRAC_IDX_MSB: FRAC_IDX_LSB]                                _*_ _*_
+
+then
+
+- if fp_*_exp is 0, this means that it is a subnormal value, and the    _*_ _*_
+  fp_*_lead is set to 0 and fp_*_exp is set to 1
+- fp_*_exp are declared as unsigned, comparison to 0 is correct         _*_ _*_                        
+
+then
+
+- the tmp_* default values are set to fp_a_* values                     _*_ _*_
+- check types are the same                                              _*_ _*_
+
+then 
+
+- fp_a_exp, fp_b_exp, both are declared as unsigned, hence this         _*_ _*_
+  comparison is correct                                                   
+- if fp_a_exp is smaller than fp_b_exp, we need to swap all their       _*_ _*_
+  values, this is done using the tmp_* which holds the fp_a_* values    
+
+then
+- exp_diff is fp_a_exp - fp_b_exp, there is no chance of underflow since
+  fp_a_exp is greater than or equal to fp_b_exp (from previous step)    _*_ _*_ 
+- type is the same                                                      _*_ _*_
+
+Output:
+- fp_*_o is the concatenation of the fp_*_* signals in this order:
+    sign bit, exp bits, carry bit, lead bit, frac bits, round bit       _*_ _*_
+- valid_o is valid_reg                                                  _*_ _*_
+- exp_diff_o is exp_diff                                                _*_ _*_
+
+Log:
+- sgm has been verified by me (7/8/25)
+- smg has been verified by me (7/14/25)

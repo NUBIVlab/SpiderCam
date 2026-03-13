@@ -1,0 +1,72 @@
+Round Normalized Value  
+
+Specification:
+- given fp_a_i and fp_b_i in total form, round fp_b_i
+- output the valid signal, reset valid signal to 0 on reset.
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    _*_
+- FRAC_WIDTH, width of fractional part                                  _*_
+
+'Local' Parameters:
+- FRAC_EX_WIDTH, width of frac ex
+    -> 1 + 1 + FRAC_WIDTH + 1                                           _*_ _*_
+- FRAC_EX_IDX_LSB, lsb index of frac ex 
+    -> 0                                                                _*_ _*_
+- FRAC_EX_IDX_MSB, msb index of frac ex
+    -> FRAC_EX_WIDTH + FRAC_EX_IDX_LSB - 1                              _*_ _*_
+- EXP_IDX_LSB, lsb index of exp ex
+    -> FRAC_EX_WIDTH                                                    _*_ _*_                                          
+- EXP_IDX_MSB, msb index of exp ex
+    -> EXP_WIDTH + EXP_IDX_LSB - 1                                      _*_ _*_
+- SIGN_IDX, index of sign bit
+    -> EXP_WIDTH + FRAC_EX_WIDTH                                        _*_ _*_
+- FP_WIDTH_TOT, width of total form fp
+    -> 1 + EXP_WIDTH + FRAC_EX_WIDTH                                    _*_ _*_
+
+IO:
+- check widths                                                          _*_ _*_ 
+
+Input Registers:
+- check widths                                                          _*_ _*_
+- fp_a_reg samples fp_a_i @ clk_i                                       _*_ _*_
+- fp_b_reg samples fp_b_i @ clk_i                                       _*_ _*_
+- if rst_i is high, valid_reg samples 0       @ clk_i                   _*_ _*_
+- if rst_i is low,  valid_reg samples valid_i @ clk_i                   _*_ _*_
+
+Main:
+- check widths                                                          _*_ _*_
+- sign, exp and frac_ex starting values                                 _*_ _*_
+
+then
+
+- if fp_b_frac_ex[0] == 1 (this is the round bit), then we              _*_ _*_
+ add 1 to fp_b_frac_ex.
+- The logic is as such:
+    - with the context of the previous round (ngm),                     _*_ _*_
+    - the carry bit 0                                                   _*_ _*_
+    - if a shift happened, the lead bit will become zero                _*_ _*_
+      and the round bit could be 1. In this case, adding 1
+      will not cause the carry bit to be 1, since the lead 
+      bit itself is 0, hence it is correct.
+    - if a shift didn't happen, the round bit will be 0,                _*_ _*_
+      which means we won't add a 1 (everything stays the 
+      same)
+    - don't arbritrarily add a 1, setting the round bit to              _*_ _*_
+      1 when it's 0 will affect calculations down the line!
+      (you must check the round bit)
+
+Output:     
+- fp_a_o is fp_a_reg                                                    _*_ _*_
+- fp_b_o is the concatenation of fp_b_sign, fp_b_exp, fp_b_frac_ex      _*_ _*_
+- valid_o is valid_reg                                                  _*_ _*_
+
+Log:
+- rnv has been verified by me (7/8/25)
+- rnv has been verfied by me (7/14/25)

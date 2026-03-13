@@ -1,0 +1,126 @@
+Divide Two Floating Point Numbers
+
+Specification:
+- given two fp numbers, fp_a_i and fp_b_i, divide them together and
+produce fp_o
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    _*_
+- FRAC_WIDTH, width of fractional part                                  _*_
+
+'Local' Parameters:
+- SIGN_IDX, the index of the sign bit                                   _*_                          
+    -> FRAC_WIDTH + EXP_WIDTH                                           
+- EXP_IDX_LSB, the lsb index of the exp bits                            _*_
+    -> FRAC_WIDTH                                                         
+- EXP_IDX_MSB, the msb index of the exp bits                            _*_
+    -> EXP_IDX_LSB + EXP_WIDTH - 1                                      
+- FRAC_IDX_LSB, the lsb index of the sign bit                           _*_         
+    -> 0                                                                
+- FRAC_IDX_MSB, the msb index of the frac bits                          _*_
+    -> FRAC_WIDTH + FRAC_IDX_LSB - 1                                    
+- FP_WIDTH_REG, width of fp in regular form                             _*_
+    -> 1 + EXP_WIDTH + FRAC_WIDTH                                       
+- FP_WIDTH_TOT, width of fp in total form                               _*_
+    -> 1 + EXP_WIDTH + 1 + 1 + FRAC_WIDTH + 1
+- FRAC_EX_WIDTH, width of frac ex                                       _*_
+    -> 1 + 1 + FRAC_WIDTH + 1
+- FRAC_EX_MULT_WIDTH, width of fp in total form                         _*_
+  *2 (for when its multiplied)
+    -> 2  * FRAC_EX_WIDTH
+- BIAS, exponent bias                                                   _*_
+    -> 2**(EXP_WIDTH - 1) - 1
+- EXP_MAX, max exponent unsigned                                        _*_  
+    -> 2**EXP_WIDTH - 1
+- FRAC_DIV_WIDTH , width of divided numbers                             
+    -> FRAC_EX_WIDTH + 2
+
+IO:
+- check widths                                                          _*_  
+
+Input Registers:
+- check widths                                                          _*_                                                
+- fp_*_reg samples fp_*_i                    @ clk_i                    _*_                                  
+- if rst_i is high, valid_reg samples 0      @ clk_i                    _*_
+- if rst_i is low, valid_reg samples valid_i @ clk_i                    _*_
+
+-- Entry --
+- The exponent logic was doing using the fp mutliplier proofing         _*_ 
+- same with fp_sign   
+- fp_a_zero and fp_b_zero set when subnormal detected                   _*_
+- fp_*_frac_div is {1'b0, fp_*_frac_ex, 1'b0}                           _*_
+- fp_quotient_start is 0                                                _*_
+
+-- Div part --
+- format is dividend/divisor = quotient
+-  check input registers and width                                      _*_
+- if dividend >= divisor, set quotient at Q_IDX to 1 and subtract the   _*_
+  divisor 
+- else set the quotient at Q_IDX to 0                                   _*_
+- dividend becomes dividend << 1                                        _*_
+- divisor stays the same                                                _*_
+- check outputs                                                         _*_
+
+- we chain FRAC_EX_WIDTH divider parts to calculate the result at each  _*_
+  Q_IDX
+- we need to calculate the bit to the right of the round bit, which is
+  why FRAC_DIV_WIDTH is FRAC_EX_WIDTH + 2 instead of +1
+  - the reason is if we have to right shift, we preserve the            _*_
+    necessary information
+- we also pipeline the sign, exp, a_zero, and b_zero alongside          _*_
+    - check pipelining and starting values
+- generate loop starts at FRAC_DIV_WIDTH - 3, ends at >= 0, corresponding_*_
+  to the indices [FRAC_DIV_WIDTH - 3, 0]
+- entry start with fp_quotient_start as quotient_i                      _*_
+    - fp_a_frac_div as dividend_i                                       _*_
+    - fp_b_frac_div as divisor_i                                        _*_
+    - valid_i as valid_reg                                              _*_
+- inputs refer to [FRAC_DIV_WIDTH - 3 - d - 1] and outputs to           _*_
+  [FRAC_DIV_WIDTH - 1 - d]
+
+-- Exit --
+- check FRAC_DIV_WIDTH
+- set fp_frac_div_result to the last wire (output from last div part)    _*_
+- set fp_exp_result to the last pipe of exp_pipe                        _*_
+- if lead bit is not 1, this means bit just below is 1                  _*_
+    - proof 1.999999 / 1.0 > 1, 1.0 / 1.99999 >= 0.5                    _*_
+    - shift left << 1                                                   _*_
+    - if exp result or exp is not maxed is not already 0, subtract 1    _*_
+    - similar to multiplier, it is possible for a result to be exactly
+      at EXP_MAX, but the left shift would make it a valid number since _*_
+      the exponent would decrease by one. My divider doesn't deal with 
+      this.
+- then check carry bit                                                 _*_
+    - add 2'b10 (not 1'b1) if so                                        _*_
+    - now check carry bit (there's only 1 number 1.11111.. that causes  _*_
+      this to happen actually)  
+        - if the carry bit is 1, right shift, this right shift cannot   _*_
+          cause the carry bit to become 1 again
+        - adjust exponent making sure its not already at max            _*_
+then
+- else we check, if the fp_exp_result is 0, we approximate              _*_
+  the subnormal value to 0 (set frac ex to 0)
+- regardless, check zero cases
+    - 0/0 = NaN                                                         _*_
+        - set exp to EXP_MAX
+        - set frac ex to 0
+    - 0/not 0 = 0                                                       _*_
+        - set exp to 0
+        - set frac ex to 0
+    - not 0/ 0 = infinity                                               _*_
+        - set exp to EXP_MAX
+        - set frac to all ones
+
+- assign fp_o to appropriate values                                     _*_          
+- assign valid_o to valid_w[FRAC_EX_WIDTH - 1]                          _*_
+
+
+
+ 
+

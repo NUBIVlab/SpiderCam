@@ -1,0 +1,85 @@
+Floating Point Adder
+
+Follows the IEEE 754 specification (almost) but has been parameterized
+so that you can adjust how many exponent bits and fraction bits
+you want.
+
+The exception is subnormal values are approximated to zero. In particular,
+the adder can accept subnormal values, but if the result produces a 
+subnormal value, the fractional bit is set to zero. The reasoning is that
+the cost in hardware isn't worth the 'gradual' descent into subnormal,
+if even smaller values are required, use more exponent bits. Adding
+a single exponent bit expands the range by 2^2^x.
+
+A second modification is then rather than adding two huge numbers
+with a bunch of zeros padded (for the larger exponent one), i limit it just
+to the round bit (see below 'total form'). In effective this makes no 
+difference when adding two values of the same sign. But when different, the
+result is often rounded up instead of down since negative values will
+become smaller then they actually are. For example, 1.51 being 1.5 is fine for same
+sign addition, but -1.51 being -1.5 means that a result will land on a .5 mark
+causing it to be rounded up when reality it should land on smaller then .5 mark, 
+which would correctly cause it to round down.
+
+The total number of bits including the sign bit is
+1 + EXP_WIDTH + FRAC_WIDTH.
+
+The total precision is 1 + FRAC_WIDTH due to the leading bit being
+1 (also called hidden bit).
+
+The bias for the exponent is 2^(EXP_WIDTH - 1) - 1
+
+Zero or subnormal is represented when the exponent == 0. This means
+that the leading bit becomes 0.
+
+Infinity or NaN is represented when the exponent == 2^(EXP_WIDTH) - 1
+
+This means the effective range of exponents are (unsigned --> signed)
+normal:       [1, 2^(EXP_WIDTH) - 2]  --> [1 - (2^(EXP_WIDTH - 1) - 1), 2^(EXP_WIDTH - 1) - 1]
+subnormal:    [0]                     --> [- 2^(EXP_WIDTH - 1)]
+Infinity/NaN: [2^(EXP_WIDTH) - 1]     --> [  2^(EXP_WIDTH - 1)]
+
+Everything is stored as unsigned, then the bias is subtracted to get the real
+exponent.
+
+'Regular form' : [sign bit | exponent bits | fractional bits]
+ but to fully encapsulate information for the coming operation, I've come up with a
+ 
+ 'Total form'   : [sign bit | exponent bits | carry bit | lead bit | fractional bits | round bit ].
+ We encode 3 additional bits of information, carry, lead and round bit. The order of the bits
+ is most convenient. Originally I wanted to call it 'Full form' but that abbreviates as FF
+ which can be confused with flip-flop.
+
+ As for the verification forms:
+ - Besides logical deductions, everytime a fundamental operator is used, the type needs to be
+ studied well.
+ - for example, using '<' with unsigned vs signed. This can be critical when determing bounds, 
+ logic unsigned [7:0] a_reg;
+ logic unsigned [7:0] x_reg;
+ logic signed   [7:0] b_reg;
+ logic [7:0] c_reg;
+ logic [7:0] d_reg;
+ ...
+ something >> a_reg  // well defined as a_reg is always a positive value
+ ...
+ something0 >> b_reg // ambiguous, what is a negative right shift? Down to interpretation of tool.
+ ...
+ if(a_reg > x_reg) // well defined, again both are unsigned values.
+ ...
+ if(c_reg > 5)     // chances are, you mean c_reg to be treated as unsigned, but since
+                  this isn't explicity declared, it's very possible for it to be treated as signed
+                  (especially considering that '5' is an integer)
+ if(c_reg > d_reg) // same issue as above
+
+ - the signed and unsignedness for addition doesn't matter as it is the same operation
+ - the signed and unsignedness for multiplication matters
+ - bit width of resulting calculation for addition is +1 of largest
+    - but we don't need to adhere to this (if you know what you are doing)
+ - bit width of resulting multiplication is the addition of the bit widths
+    - this needs to be strictly adhered to because there is ambiguity as to what to
+      do if there isn't enough bits.
+    
+
+
+ 
+ 

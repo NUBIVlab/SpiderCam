@@ -1,0 +1,118 @@
+Normalize result
+
+Specification:
+- given fp_i, we need to normalize it such that the msb is stored
+  at the lead bit location
+- in this case, the msb refers to the first 1 bit found at the most
+  significant bit position (not just the left most bit).
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    
+- FRAC_WIDTH, width of fractional part                                  
+
+'Local' Parameters:
+- FRAC_EX_WIDTH, width of frac ex                       
+    -> 1 + 1 + FRAC_WIDTH + 1                                       _*_ _*_                                                                               
+- FRAC_EX_IDX_LSB, lsb index of frac ex 
+    -> 0                                                            _*_ _*_                                                                      
+- FRAC_EX_IDX_MSB, msb index of frac ex
+    -> FRAC_EX_WIDTH + FRAC_EX_IDX_LSB - 1                          _*_ _*_                                                    
+- EXP_IDX_LSB, lsb index of exp ex
+    -> FRAC_EX_WIDTH                                                _*_ _*_                                                                                                  
+- EXP_IDX_MSB, msb index of exp ex
+    -> EXP_WIDTH + EXP_IDX_LSB - 1                                  _*_ _*_                                                       
+- SIGN_IDX, index of sign bit
+    -> EXP_WIDTH + FRAC_EX_WIDTH                                    _*_ _*_                                          
+- FP_WIDTH_TOT, width of total form fp
+    -> 1 + EXP_WIDTH + FRAC_EX_WIDTH                                _*_ _*_ 
+- CARRY_IDX, idx of carry bit
+    -> 1 + FRAC_WIDTH + 1                                           _*_ _*_
+- LEAD_IDX, idx of lead bit
+    -> FRAC_WIDTH + 1                                               _*_ _*_
+- EXP_MAX, max value of an exponent (INF)
+    -> (2**EXP_WIDTH) - 1                                           _*_ _*_
+
+IO:
+- check widths                                                          
+
+Input Registers:
+- check widths                                                      _*_ _*_                                                      
+- fp_reg samples fp_i @ clk_i                                       _*_ _*_     
+- if rst_i is high, valid_reg samples 0       @ clk_i               _*_ _*_         
+- if rst_i is low,  valid_reg samples valid_i @ clk_i               _*_ _*_    
+
+Main:
+- check widths                                                      _*_ _*_
+- sign, exp and frac_ex starting values                             _*_ _*_
+- check exp_const is exp starting value                             _*_ _*_
+- check frac_ex_const is frac_ex starting value
+- exp must be declared as unsigned                                  _*_ _*_                                 
+- The logic is as such:
+    - with the context of the previous round (cvu), we know         _*_ _*_
+      it is in unsigned mode
+    - We have to identify where the first 1 bit is located          _*_ _*_
+      and do the appropriate shift
+    - if the msb 1-bit is the carry bit, increase the exponent by 1 _*__*_
+      and perform a right shift                                             
+    - else if the msb 1-bit is the lead bit, do nothing             _*_ _*_
+    - else if the msb 1-bit is the LEAD_IDX - 1 bit,                _*_ _*_
+      decrease the exponent by 1, perform 1 left shift
+    - else if the msb 1-bit is the LEAD_IDX - 2 bit,                _*_ _*_
+      decrease the exponent by 2, peform 2 left shifts
+    - written as the for loop i going from 0 -> LEAD_IDX - 1:       _*_ _*_
+        - the number of left shifts is calculated as                _*_ _*_
+          (LEAD_IDX - i) == ((FRAC_WIDTH + 1) - i)
+        - we see that when i = 0, we shift by FRAC_WIDTH + 1        _*_ _*_    
+          which is correct
+        - the usage of fp_exp_cont and fp_exp_const and the         _*_ _*_
+          ascending order of i means logically only the most 
+          significant 1 bit found will be found.
+            - specifically, all conditions are checked with         _*_ _*_
+              the const values
+            - all assignments are set with the const value          _*_ _*_
+      ...
+    - else if the msb 1-bit is the LEAD_IDX - (FRAC_WIDTH + 1),     
+      which is the round bit, perform FRAC_WIDTH + 1  left shifts   _*_ _*_
+      and decrease the exponent by FRAC_WIDTH + 1
+    - else, there is no 1 bit, therefore this result is 0,          _*_ _*_
+      meaning, set the exponent to 0
+    - there is an additional issue, we have to guarantee that       _*_ _*_
+      +/- to the exponent doesn't cause overflow/underflow and
+      we also have to make sure that INF/NAN results are 
+      preserved, meaning, an INF result can't be lowered
+      back into a sensible result. We also have to treat the 
+      'descent' into subnormal values properly. This is expensive,
+      so instead, if subnormal is detected, we simply set the
+      result to 0.
+      - if exp is at INF, which is 2**(EXP_WIDTH) - 1,              _*_ _*_
+        preserve it, else
+        - carry bit scenario, +1, safe since it is within the       _*_ _*_
+          outer if statement
+        - LEAD_IDX - i scenario, if exp > (LEAD_IDX - i), this is   _*_ _*_
+          fine, otherwise, set exp to 0, set frac_ex to 0
+          - this includes when it is (FRAC_WIDTH + 1), the round    _*_ _*_
+            bit scenario
+        - else set exp to 0, set frac_ex to 0                       _*_ _*_
+      - the outer if of exp INF is checked with exp_const and
+        set accordingly as the last step                            _*_ _*_
+    - '<<' is correct, logical shift fills 0 from right             _*_ _*_
+    - '>>' is correct, logical shift fills 0 from left              _*_ _*_
+    - '>' are correct, exp are explicitly unsigned                  _*_ _*_
+    - '==' are correct, exp are explicitly unsigned                 _*_ _*_
+    - using int in for loop is appropriate                          _*_ _*_
+    - doing > (LEAD_IDX - i) is fine as there are enough
+      bits and (LEAD_IDX - i) will never be negative                _*_ _*_
+
+Output
+- fp_o is the concatenation of fp_sign, fp_exp and fp_frac_exp      _*_ _*_      
+- valid_o is valid_reg                                              _*_ _*_
+
+Log:
+- nr has been verified by me (7/10/25)
+- nr has been verified by me (7/14/25)

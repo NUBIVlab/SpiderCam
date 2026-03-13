@@ -1,0 +1,13 @@
+(fp_lib_table
+  (lib (name "himax")(type "KiCad")(uri "${KIPRJMOD}/himax.pretty")(options "")(descr ""))
+  (lib (name "USB3320C_EZK")(type "KiCad")(uri "${KIPRJMOD}/USB3320C_EZK/USB3320C_EZK.pretty")(options "")(descr ""))
+  (lib (name "74CBTLV3257BQ_115")(type "KiCad")(uri "${KIPRJMOD}/74CBTLV3257BQ_115/KiCADv6/74CBTLV3257BQ_115.pretty")(options "")(descr ""))
+  (lib (name "STM32F750Z8T6")(type "KiCad")(uri "${KIPRJMOD}/STM32F750Z8T6/KiCADv6/STM32F750Z8T6.pretty")(options "")(descr ""))
+  (lib (name "BM06B_SURS_TF")(type "KiCad")(uri "${KIPRJMOD}/BM06B_SURS_TF/KiCADv6/BM06B_SURS_TF.pretty")(options "")(descr ""))
+  (lib (name "USB4105_GF_A")(type "KiCad")(uri "${KIPRJMOD}/USB4105_GF_A/USB4105_GF_A.pretty")(options "")(descr ""))
+  (lib (name "diodes_incorporated")(type "KiCad")(uri "${KIPRJMOD}/AP7331-SNG-7/diodes_incorporated.pretty")(options "")(descr ""))
+  (lib (name "ABM3B_12_000MHZ_B2_T")(type "KiCad")(uri "${KIPRJMOD}/ABM3B_12_000MHZ_B2_T")(options "")(descr ""))
+  (lib (name "molex_5051103091")(type "KiCad")(uri "${KIPRJMOD}/molex_5051103091/KiCADv6/footprints.pretty")(options "")(descr ""))
+  (lib (name "TPS6284X")(type "KiCad")(uri "${KIPRJMOD}/TPS62840DLCR/footprints.pretty")(options "")(descr ""))
+  (lib (name "L_2016")(type "KiCad")(uri "${KIPRJMOD}/L_2016/footprints.pretty")(options "")(descr ""))
+)

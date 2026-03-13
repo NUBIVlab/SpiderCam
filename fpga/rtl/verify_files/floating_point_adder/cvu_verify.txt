@@ -1,0 +1,75 @@
+Convert to unsigned
+
+Specification:
+- given fp_i, fp_a_sign_i, fp_b_sign_i, using the sign bits
+  fp_frac_ex to a positive value and determine the Finally
+  resulting sign bit.
+
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    
+- FRAC_WIDTH, width of fractional part                                  
+
+'Local' Parameters:
+- FRAC_EX_WIDTH, width of frac ex                       
+    -> 1 + 1 + FRAC_WIDTH + 1                                           _*_ _*_                                             
+- FRAC_EX_IDX_LSB, lsb index of frac ex 
+    -> 0                                                                _*_ _*_                                                                     
+- FRAC_EX_IDX_MSB, msb index of frac ex
+    -> FRAC_EX_WIDTH + FRAC_EX_IDX_LSB - 1                              _*_ _*_                                                   
+- EXP_IDX_LSB, lsb index of exp ex
+    -> FRAC_EX_WIDTH                                                    _*_ _*_                                                                                                 
+- EXP_IDX_MSB, msb index of exp ex
+    -> EXP_WIDTH + EXP_IDX_LSB - 1                                      _*_ _*_                                                      
+- SIGN_IDX, index of sign bit
+    -> EXP_WIDTH + FRAC_EX_WIDTH                                        _*_ _*_                                         
+- FP_WIDTH_TOT, width of total form fp
+    -> 1 + EXP_WIDTH + FRAC_EX_WIDTH                                    _*_ _*_
+- CARRY_IDX, idx of carry bit
+    -> 1 + FRAC_WIDTH + 1                                               _*_ _*_
+
+IO:
+- check widths                                                          _*_ _*_                                         
+
+Input Registers:
+- check widths                                                          _*_ _*_                                           
+- fp_reg samples fp_i @ clk_i                                           _*_ _*_
+- fp_a_sign_reg samples fp_a_sign_i @ clk_i                             _*_ _*_                             
+- fp_b_sign_reg smaples fp_b_sign_i @ clk_i                             _*_ _*_
+- if rst_i is high, valid_reg samples 0       @ clk_i                   _*_ _*_             
+- if rst_i is low,  valid_reg samples valid_i @ clk_i                   _*_ _*_
+ 
+Main:
+- check widths                                                          _*_ _*_
+- sign, exp, frac_ex starting values for fp_*                           _*_ _*_
+- The logic is as such:
+    - fp_*_frac_ex are in signed mode, if both sign bits are equal,     _*_ _*_
+      resulting carry bit represents an actual carry bit
+      - in this case, no conversion is necessary                        _*_ _*_
+      - the result sign bit is fp_a_sign_reg                            _*_ _*_
+    - if the bits are different, the carry bit represents a sign bit
+      - in this case, if the carry bit is 1 (meaning negative value),
+        we need to do complemenet + 1 to convert it to positive value   _*_ _*_
+        - this also means the result sign bit is 1                      _*_ _*_
+      - converting a negative value to positive will never cause an
+        overflow, since you can convert a signed value to unsigned
+        in the same number of bits                                      _*_ _*_
+      - if the carry bit is zero, it is a positive value, no need to    _*_ _*_
+        convert
+        - this also means the result sign bit is 0                      _*_ _*_
+      - There is another important check, if it turns out the result
+        is zero, we need to set fp_exp to 0                             _*_ _*_
+    
+Output
+- fp_o is the concatenation of fp_sign, fp_exp and fp_frac_exp          _*_ _*_
+- valid_o is valid_reg                                                  _*_ _*_
+
+Log:
+- cvu has been verified by me (7/9/25)
+- cvu has been verified by me (7/14/25)

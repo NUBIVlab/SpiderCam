@@ -1,0 +1,79 @@
+Add Values Together
+
+Specification:
+- given fp_a_i and fp_b_i in total form add them
+  together and output the result
+- output fp_a_sign and fp_b_sign, this will be necessary
+ for cvu (next stage) to determine how to interpret the
+ carry bit
+
+
+Descriptions:
+- frac ex (expand) describes carry bit, lead bit, frac bits and round bit
+  in that order.
+- it's just a way to break up the full form into pieces:
+    {sign bit, exp bits, frac ex bits} for ease of use
+
+Parameters:
+- EXP_WIDTH,  width of exponent part                                    
+- FRAC_WIDTH, width of fractional part                                  
+
+'Local' Parameters:
+- FRAC_EX_WIDTH, width of frac ex                       
+    -> 1 + 1 + FRAC_WIDTH + 1                                           _*_ _*_                                   
+- FRAC_EX_IDX_LSB, lsb index of frac ex 
+    -> 0                                                                _*_ _*_                                            
+- FRAC_EX_IDX_MSB, msb index of frac ex
+    -> FRAC_EX_WIDTH + FRAC_EX_IDX_LSB - 1                              _*_ _*_                      
+- EXP_IDX_LSB, lsb index of exp ex
+    -> FRAC_EX_WIDTH                                                    _*_ _*_                                                                               
+- EXP_IDX_MSB, msb index of exp ex
+    -> EXP_WIDTH + EXP_IDX_LSB - 1                                      _*_ _*_                                 
+- SIGN_IDX, index of sign bit
+    -> EXP_WIDTH + FRAC_EX_WIDTH                                        _*_ _*_                      
+- FP_WIDTH_TOT, width of total form fp
+    -> 1 + EXP_WIDTH + FRAC_EX_WIDTH                                    _*_ _*_
+
+IO:
+- check widths                                                          _*_ _*_ 
+
+Input Registers:
+- check widths                                                          _*_ _*_
+- fp_a_reg samples fp_a_i @ clk_i                                       _*_ _*_
+- fp_b_reg samples fp_b_i @ clk_i                                       _*_ _*_
+- if rst_i is high, valid_reg samples 0       @ clk_i                   _*_ _*_
+- if rst_i is low,  valid_reg samples valid_i @ clk_i                   _*_ _*_
+
+Main:   
+- check widths                                                          _*_ _*_                                      
+- sign, exp and frac_ex starting values for fp_*                        _*_ _*_
+- sign, frac_ex starting for fp is set to 0s                            _*_ _*_        
+- frac_exp for fp is set to fp_exp_a                                    _*_ _*_
+- the logic is as such:
+    - with the context of the previous round (cvt)                      _*_ _*_
+    - the frac_ex values are in signed mode                             _*_ _*_
+    - if the sign bits were different, the negative one                 
+      is negative
+    - if the sign bits are the same, both are positive                  _*_ _*_
+    - meaning, if the sign bits are the same, if they are               _*_ _*_
+      added, the carry bit is a genuine carry bit
+    - if the sign bits are different,                                   _*_ _*_
+        - an overflow is impossible, since one value is positive
+          and the other negative
+        - the carry bit actually represents the resulting sign
+          of the addition
+    - this also means, for the output, we need to pass the              _*_ _*_
+      fp_a_sign adn fp_b_sign, so the next stage knows how
+    - to interpret it
+    - + is fine                                                         _*_ _*_
+
+
+Output:
+- fp_o is concatenation of fp_sign, fp_exp and fp_frac_exp              _*_ _*_
+- fp_a_sign_o is fp_a_sign                                              _*_ _*_
+- fp_b_sign_o is fp_b_sign                                              _*_ _*_
+- valid_o is valid_reg                                                  _*_ _*_
+
+Log:
+- avt has been verified by me (7/9/25)
+- avt has been verified by me (7/14/25)

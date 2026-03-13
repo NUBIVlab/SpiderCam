@@ -1,0 +1,51 @@
+Floating Point Divider
+Follows the IEEE 754 specification (almost) but has been parameterized
+so that you can adjust how many exponent bits and fraction bits
+you want.
+
+The exception is subnormal values are approximated to zero. In particular,
+the divider can accept subnormal values, but it will treat it as a 0
+(the fractional bits will be set to 0). The reasoning is that
+the cost in hardware isn't worth the 'gradual' descent into subnormal,
+if even smaller values are required, use more exponent bits. Adding
+a single exponent bit expands the range by 2^2^x.
+The total number of bits including the sign bit is
+1 + EXP_WIDTH + FRAC_WIDTH.
+
+By doing so, this guarantees that the lead bits of the divided numbers are
+either are 1, or just 0 (with fractional bits being zero). This minimizes
+any amount of shifting as the smallest value produced would only have
+to be shift once (not including x/0, 0/x and 0/0 whic have to be handled)
+
+Similar to multiplier, it is possible for a result to be exactly
+at EXP_MAX, but the left shift would make it a valid number since 
+the exponent would decrease by one. My divider doesn't deal with 
+this. In summary, if the intermediary result goes to infinity,
+it stays at infinity even if such a case would bring it back.
+ 
+The total precision is 1 + FRAC_WIDTH due to the leading bit being
+1 (also called hidden bit).
+
+The bias for the exponent is 2^(EXP_WIDTH - 1) - 1
+
+Zero or subnormal is represented when the exponent == 0. This means
+that the leading bit becomes 0.
+
+Infinity or NaN is represented when the exponent == 2^(EXP_WIDTH) - 1
+
+This means the effective range of exponents are (unsigned --> signed)
+normal:       [1, 2^(EXP_WIDTH) - 2]  --> [1 - (2^(EXP_WIDTH - 1) - 1), 2^(EXP_WIDTH - 1) - 1]
+subnormal:    [0]                     --> [- 2^(EXP_WIDTH - 1)]
+Infinity/NaN: [2^(EXP_WIDTH) - 1]     --> [  2^(EXP_WIDTH - 1)]
+
+Everything is stored as unsigned, then the bias is subtracted to get the real
+exponent.
+
+'Regular form' : [sign bit | exponent bits | fractional bits]
+but to fully encapsulate information for the coming operation, I've come up with a
+
+'Total form'   : [sign bit | exponent bits | carry bit | lead bit | fractional bits | round bit ].
+We encode 3 additional bits of information, carry, lead and round bit. The order of the bits
+is most convenient. Originally I wanted to call it 'Full form' but that abbreviates as FF
+which can be confused with flip-flop.
+

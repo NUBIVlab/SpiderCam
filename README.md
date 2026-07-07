@@ -1,8 +1,8 @@
 ## [CVPR 2026] SpiderCam: Low-Power Snapshot Depth from Differential Defocus
 
-<b>[Marcos A. Ferreira](https://marc103.github.io/)</b><sup>*,1</sup>, <b>[Tianao Li](https://lukeli0425.github.io)</b><sup>*,1</sup>, <b>[John Mamish](https://scholar.google.com/citations?user=ux9iJ74AAAAJ&hl=en)</b><sup>*,2</sup>, <b>[Josiah Hester](https://josiahhester.com/)</b><sup>2</sup>, <b>[Yaman Sangar](https://scholar.google.com/citations?user=gbBJzRkAAAAJ&hl=en&oi=ao)</b><sup>2</sup>, <b>[Qi Guo](https://www.qiguo.org/)</b><sup>3</sup>, <b>[Emma Alexander](https://www.alexander.vision/emma)</b><sup>1</sup>
+<b>[Marcos A. Ferreira](https://marc103.github.io/)</b><sup>&ast;,1</sup>, <b>[Tianao Li](https://lukeli0425.github.io/)</b><sup>&ast;,1</sup>, <b>[John Mamish](https://scholar.google.com/citations?user=ux9iJ74AAAAJ&hl=en)</b><sup>&ast;,2</sup>, <b>[Josiah Hester](https://josiahhester.com/)</b><sup>2</sup>, <b>[Yaman Sangar](https://scholar.google.com/citations?user=gbBJzRkAAAAJ&hl=en&oi=ao)</b><sup>2</sup>, <b>[Qi Guo](https://www.qiguo.org/)</b><sup>3</sup>, <b>[Emma Alexander](https://www.alexander.vision/emma)</b><sup>1</sup>
 <br>
-<sup>1</sup>Northwestern University, <sup>2</sup>Georgia Institute of Technology, <sup>3</sup>Purdue University, *Equal contribution.
+<sup>1</sup>Northwestern University, <sup>2</sup>Georgia Institute of Technology, <sup>3</sup>Purdue University, <sup>&ast;</sup>Equal contribution.
 
 _IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2026_
 

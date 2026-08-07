@@ -1,0 +1,21 @@
+defaults:
+  - _self_
+  - hydra: default
+  - model: focal_split
+  - data: '10-30'
+
+
+optim:
+  optimizer: adamw
+  lr: 5e-2
+  weight_decay: 0.005
+  clip: 1.0
+  batch_size: 32
+  sparsity: 0.9
+  z_min: [0.0, 0.0] # [0.38, 0.30]
+  z_max: [1.5, 1.5] # [1.06, 0.86]
+
+n_epochs: 100
+pretrained_epochs: 0
+eval_interval: 10
+

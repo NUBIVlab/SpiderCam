@@ -1,0 +1,17 @@
+name: 'focal_split'
+n_scales: 2
+dxdy: true
+
+const: 'rings'
+n_rings: 16
+n_orders: 2
+conf: 'VW' # ['VW', 'W2', '|V|', '|W|']
+
+gaussian_denoise: 5
+box_filter_background: 3
+box_denoise: false
+mode: 'joint' # 'joint' or 'separate'
+# A_init: [1.79, 1.9, 0.1]
+# B_init: [5.53, 2.2, 5.3]
+# omega_init: [0.0, 0.0]
+fft: false

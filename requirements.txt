@@ -1,0 +1,11 @@
+numpy
+matplotlib
+scipy
+opencv-python
+ipykernel
+torch
+torchvision
+tqdm
+hydra-core
+ftd2xx
+PyQt5

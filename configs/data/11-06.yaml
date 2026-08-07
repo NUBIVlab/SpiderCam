@@ -1,0 +1,13 @@
+name: '11-06'
+
+data_path: /mnt/WD14TB/tianaoli/Low-Power-DfDD/2025-11-06/
+type: linear_slide_new
+group: texture1
+
+channel: 'gray'
+crop: True
+frame_range: [6, 42]
+mask: [15, 415, 5, 485]
+center: [185, 240]
+step_size: 0.02
+offset: 0.24

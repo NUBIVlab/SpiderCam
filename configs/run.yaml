@@ -1,0 +1,18 @@
+defaults:
+  - _self_
+  - hydra: default
+  - model: focal_split
+  - data: '10-30'
+
+
+optim:
+  optimizer: adamw
+  lr: 5e-2
+  weight_decay: 0.005
+  clip: 1.0
+  sparsity: 0.9
+
+n_epochs: 100
+
+maxchannels: 2
+ftdi_sn_prefix: "fsplit"
